@@ -1,0 +1,24 @@
+{
+    "name": "buzkall/future-letters",
+    "description": "Create a mail that will be sent to yourself on a specific date",
+    "authors": [
+        {
+            "name": "buzkall",
+            "email": "buzkall@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Buzkall\\FutureLetters\\": "src/"
+        }
+    },
+    "minimum-stability": "dev",
+    "require": {},
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Buzkall\\FutureLetters\\FutureLettersServiceProvider"
+            ]
+        }
+    }
+}
