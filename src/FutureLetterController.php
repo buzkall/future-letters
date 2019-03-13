@@ -3,13 +3,12 @@
 namespace Buzkall\FutureLetters;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Session;
 
 class FutureLetterController extends Controller
 {
     /**
      * List Future Letters
+     *
      * @return \Illuminate\View\View
      */
     public function index()
@@ -23,7 +22,7 @@ class FutureLetterController extends Controller
         $input = $request->validated();
         FutureLetter::create($input);
 
-        return back()->with('success','Future letter prepared to send!');
+        return back()->with('success', 'Future letter prepared to send!');
     }
 
     public function edit($id)
@@ -39,13 +38,13 @@ class FutureLetterController extends Controller
         $future_letter = FutureLetter::findOrFail($id);
         $future_letter->update($input);
 
-        return redirect()->route('future-letters.index')->with('success','Updated your future letter!');
+        return redirect()->route('future-letters.index')->with('success', 'Updated your future letter!');
     }
 
     public function destroy($id)
     {
         $future_letter = FutureLetter::findOrFail($id);
         $future_letter->delete();
-        return redirect()->route('future-letters.index');
+        return redirect()->route('future-letters.index')->with('success', 'Deleted future letter!');;
     }
 }
