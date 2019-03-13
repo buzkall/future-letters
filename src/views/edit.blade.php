@@ -6,26 +6,27 @@
 
             @include('future-letters::flash-message')
 
-            <h2>Send a letter to your future self</h2>
-            <form action="/future-letters" method="POST">
+            <h2>Edit your future self</h2>
+            <form action="/future-letters/{{$future_letter->id}}" method="POST">
+                @method('PUT')
                 @csrf
                 <div class="form-group">
                     <label for="email">Email</label>
                     <input type="email" required class="form-control" name="email" id="email"
-                           value="{{ old('email') }}"
+                           value="{{ old('email') ?: $future_letter->email }}"
                            aria-describedby="helpId" placeholder="Email">
                     <small id="helpId" class="form-text text-muted">You will need to confirm you can access this email</small>
                 </div>
                 <div class="form-group">
                     <label for="subject">Subject</label>
                     <input type="text" required class="form-control" name="subject" id="subject"
-                           value="{{ old('subject') }}"
+                           value="{{ old('subject') ?: $future_letter->subject }}"
                            aria-describedby="helpId" placeholder="Subject">
                 </div>
                 <div class="form-group">
                     <label for="message">Message</label>
                     <textarea required class="form-control" name="message" id="message" rows="3"
-                              placeholder="What would you tell to your future self?">{{ old('message') }}</textarea>
+                    placeholder="What would you tell to your future self?">{{ old('message') ?: $future_letter->message }}</textarea>
                 </div>
 
                 <div class="form-group">
@@ -50,12 +51,14 @@
     </div>
 @endsection
 
+
 @section('scripts_footer')
     <script type="text/javascript">
+
         $(document).ready(function () {
             $('#datetimepicker').datetimepicker({
                 locale: 'es',
-                minDate: moment().add(1, 'days'),
+                defaultDate: '{!! $future_letter->sending_date  !!}',
                 ignoreReadonly: false
             });
         });

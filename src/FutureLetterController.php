@@ -4,48 +4,48 @@ namespace Buzkall\FutureLetters;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Session;
 
 class FutureLetterController extends Controller
 {
+    /**
+     * List Future Letters
+     * @return \Illuminate\View\View
+     */
     public function index()
     {
-        $future_letters = FutureLetter::all();
-
+        $future_letters = FutureLetter::getFutureLetters();
         return view('future-letters::list', compact('future_letters'));
     }
 
-    public function create()
+    public function store(FutureLetterRequest $request)
     {
-        $future_letters = FutureLetter::all();
-        return view('future-letters::create', compact('future_letters'));
-    }
-
-    public function store()
-    {
-        $input = Request::all();
+        $input = $request->validated();
         FutureLetter::create($input);
-        return redirect()->route('future-letters.create');
+
+        return back()->with('success','Future letter prepared to send!');
     }
 
     public function edit($id)
     {
         $future_letters = FutureLetter::all();
-        $future_letter = $future_letters->find($id);
-        return view('future-letters::list', compact('future_letters', 'future_letter'));
+        $future_letter = FutureLetter::findOrFail($id);
+        return view('future-letters::edit', compact('future_letters', 'future_letter'));
     }
 
-    public function update($id)
+    public function update(FutureLetterRequest $request, $id)
     {
-        $input = Request::all();
+        $input = $request->validated();
         $future_letter = FutureLetter::findOrFail($id);
         $future_letter->update($input);
-        return redirect()->route('future-letters.list');
+
+        return redirect()->route('future-letters.index')->with('success','Updated your future letter!');
     }
 
     public function destroy($id)
     {
         $future_letter = FutureLetter::findOrFail($id);
         $future_letter->delete();
-        return redirect()->route('future-letters.list');
+        return redirect()->route('future-letters.index');
     }
 }
