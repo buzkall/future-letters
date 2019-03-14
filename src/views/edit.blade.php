@@ -2,11 +2,11 @@
 
 @section('content')
     <div class="row">
-        <div class="col-lg-8">
+        <div class="col-lg-8 mb-3">
 
             @include('future-letters::flash-message')
 
-            <h2>Edit your future self</h2>
+            <h2>Hi, {{ '@'. $future_letter->user->name }}, Edit your future self</h2>
             <form action="/future-letters/{{$future_letter->id}}" method="POST">
                 @method('PUT')
                 @csrf

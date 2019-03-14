@@ -2,17 +2,17 @@
 
 @section('content')
     <div class="row">
-        <div class="col-lg-8">
+        <div class="col-lg-8 mb-3">
 
             @include('future-letters::flash-message')
 
-            <h2>Send a letter to your future self</h2>
+            <h2>Hi {{ '@'.Auth::user()->name }}, Send a letter to your future self</h2>
             <form action="/future-letters" method="POST">
                 @csrf
                 <div class="form-group">
                     <label for="email">Email</label>
                     <input type="email" required class="form-control" name="email" id="email"
-                           value="{{ old('email') }}"
+                           value="{{ old('email') ?: Auth::user()->email }}"
                            aria-describedby="helpId" placeholder="Email">
                     <small id="helpId" class="form-text text-muted">You will need to confirm you can access this email</small>
                 </div>

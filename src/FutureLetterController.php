@@ -3,6 +3,7 @@
 namespace Buzkall\FutureLetters;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 
 class FutureLetterController extends Controller
 {
@@ -13,7 +14,8 @@ class FutureLetterController extends Controller
      */
     public function index()
     {
-        $future_letters = FutureLetter::getFutureLetters();
+        $user_id = Auth::user()->id;
+        $future_letters = FutureLetter::getFutureLettersFromUserId($user_id);
         return view('future-letters::list', compact('future_letters'));
     }
 
@@ -29,22 +31,34 @@ class FutureLetterController extends Controller
     {
         $future_letters = FutureLetter::all();
         $future_letter = FutureLetter::findOrFail($id);
-        return view('future-letters::edit', compact('future_letters', 'future_letter'));
+
+        if ($future_letter->user->id == Auth::user()->id) {
+            return view('future-letters::edit', compact('future_letters', 'future_letter'));
+        }
+        return redirect()->route('future-letters.index')->with('error', 'That\'s not yours!');
     }
 
     public function update(FutureLetterRequest $request, $id)
     {
         $input = $request->validated();
         $future_letter = FutureLetter::findOrFail($id);
-        $future_letter->update($input);
 
-        return redirect()->route('future-letters.index')->with('success', 'Updated your future letter!');
+        if ($future_letter->user->id == Auth::user()->id) {
+            $future_letter->update($input);
+            return redirect()->route('future-letters.index')->with('success', 'Updated your future letter!');
+        }
+        return redirect()->route('future-letters.index')->with('error', 'That\'s not yours!');
     }
 
     public function destroy($id)
     {
         $future_letter = FutureLetter::findOrFail($id);
-        $future_letter->delete();
-        return redirect()->route('future-letters.index')->with('success', 'Deleted future letter!');;
+
+        if ($future_letter->user->id == Auth::user()->id) {
+            $future_letter->delete();
+            return redirect()->route('future-letters.index')->with('warning', 'Deleted future letter!');
+        }
+        return redirect()->route('future-letters.index')->with('error', 'That\'s not yours!');
     }
+
 }
