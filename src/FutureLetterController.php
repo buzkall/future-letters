@@ -4,6 +4,7 @@ namespace Buzkall\FutureLetters;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Notification;
 
 class FutureLetterController extends Controller
 {
@@ -19,6 +20,10 @@ class FutureLetterController extends Controller
         return view('future-letters::list', compact('future_letters'));
     }
 
+    /**
+     * @param FutureLetterRequest $request
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function store(FutureLetterRequest $request)
     {
         $input = $request->validated();
@@ -27,6 +32,10 @@ class FutureLetterController extends Controller
         return back()->with('success', 'Future letter prepared to send!');
     }
 
+    /**
+     * @param $id
+     * @return \Illuminate\View\View
+     */
     public function edit($id)
     {
         $future_letters = FutureLetter::all();
@@ -38,6 +47,11 @@ class FutureLetterController extends Controller
         return redirect()->route('future-letters.index')->with('error', 'That\'s not yours!');
     }
 
+    /**
+     * @param FutureLetterRequest $request
+     * @param                     $id
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function update(FutureLetterRequest $request, $id)
     {
         $input = $request->validated();
@@ -50,6 +64,12 @@ class FutureLetterController extends Controller
         return redirect()->route('future-letters.index')->with('error', 'That\'s not yours!');
     }
 
+    /**
+     * DELETE endpoint
+     *
+     * @param $id
+     * @return \Illuminate\Http\RedirectResponse
+     */
     public function destroy($id)
     {
         $future_letter = FutureLetter::findOrFail($id);
@@ -61,4 +81,17 @@ class FutureLetterController extends Controller
         return redirect()->route('future-letters.index')->with('error', 'That\'s not yours!');
     }
 
+    /**
+     * GET endpoint /cron
+     */
+    public function cron()
+    {
+        $future_letters_to_send = FutureLetter::getFutureLettersToSend();
+        foreach ($future_letters_to_send as $future_letter_to_send) {
+
+            echo 'send mail to ' . $future_letter_to_send->email . '<br />';
+
+            Notification::send($future_letter_to_send->user, new FutureLetterNotification());
+        }
+    }
 }

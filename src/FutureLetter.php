@@ -44,6 +44,13 @@ class FutureLetter extends Model
                    ->get();
     }
 
+    public static function getFutureLettersToSend()
+    {
+        return self::where('sending_date', '<=', Carbon::now())
+            ->whereNull('sent_at')
+            ->get();
+    }
+
     /**
      * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
      */

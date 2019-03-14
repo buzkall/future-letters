@@ -5,4 +5,5 @@ Route::group(['middleware' => ['web', 'auth']], function () {
                     'Buzkall\FutureLetters\FutureLetterController')
          ->except(['create', 'show']);
 
+    Route::get('cron', 'Buzkall\FutureLetters\FutureLetterController@cron');
 });
