@@ -3,28 +3,28 @@
 namespace Buzkall\FutureLetters;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Notifications\Notification;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Notifications\Notification;
 
 class FutureLetterNotification extends Notification
 {
     use Queueable;
+    protected $future_letter;
 
     /**
      * Create a new notification instance.
      *
-     * @return void
+     * @param $future_letter
      */
-    public function __construct()
+    public function __construct($future_letter)
     {
-        //
+        $this->future_letter = $future_letter;
     }
 
     /**
      * Get the notification's delivery channels.
      *
-     * @param  mixed  $notifiable
+     * @param  mixed $notifiable
      * @return array
      */
     public function via($notifiable)
@@ -35,15 +35,17 @@ class FutureLetterNotification extends Notification
     /**
      * Get the mail representation of the notification.
      *
-     * @param  mixed  $notifiable
+     * @param  mixed $notifiable
      * @return \Illuminate\Notifications\Messages\MailMessage
      */
     public function toMail($notifiable)
     {
         return (new MailMessage)
-                    ->line('The introduction to the notification.')
-                    ->action('Notification Action', url('/'))
-                    ->line('Thank you for using our application!');
+            ->greeting('Hi @' . $this->future_letter->user->name . ', ')
+            ->subject($this->future_letter->subject)
+            ->line($this->future_letter->message)
+            ->salutation('--FutureLetters-- 
+ You wrote this on the ' . $this->future_letter->created_at->format('d/m/Y H:i'));
     }
 
 }

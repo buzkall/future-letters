@@ -6,7 +6,7 @@
 
             @include('future-letters::flash-message')
 
-            <h2>Hi {{ '@'.Auth::user()->name }}, Send a letter to your future self</h2>
+            <h2>Hi {{ '@'.Auth::user()->name }}, send a letter to your future self</h2>
             <form action="/future-letters" method="POST">
                 @csrf
                 <div class="form-group">

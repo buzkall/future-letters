@@ -47,8 +47,8 @@ class FutureLetter extends Model
     public static function getFutureLettersToSend()
     {
         return self::where('sending_date', '<=', Carbon::now())
-            ->whereNull('sent_at')
-            ->get();
+                   ->whereNull('sent_at')
+                   ->get();
     }
 
     /**

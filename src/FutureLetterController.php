@@ -3,6 +3,7 @@
 namespace Buzkall\FutureLetters;
 
 use App\Http\Controllers\Controller;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Notification;
 
@@ -83,15 +84,27 @@ class FutureLetterController extends Controller
 
     /**
      * GET endpoint /cron
+     * Will send letters with sending_date before current timestamp
+     * and store the sending time in the sent_at field
      */
     public function cron()
     {
+        $output = '';
         $future_letters_to_send = FutureLetter::getFutureLettersToSend();
         foreach ($future_letters_to_send as $future_letter_to_send) {
 
-            echo 'send mail to ' . $future_letter_to_send->email . '<br />';
+            $output .= 'Sent mail to ' . $future_letter_to_send->email . '<br />';
 
-            Notification::send($future_letter_to_send->user, new FutureLetterNotification());
+            $notification = new FutureLetterNotification($future_letter_to_send);
+            Notification::send($future_letter_to_send->user, $notification);
+
+            // set to sent in db
+            $future_letter_to_send->sent_at = Carbon::now();
+            $future_letter_to_send->save();
         }
+        if (empty($output)) {
+            $output = 'No messages ready to send';
+        }
+        echo $output;
     }
 }

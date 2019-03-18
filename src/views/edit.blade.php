@@ -6,7 +6,7 @@
 
             @include('future-letters::flash-message')
 
-            <h2>Hi, {{ '@'. $future_letter->user->name }}, Edit your future self</h2>
+            <h2>Hi, {{ '@'. $future_letter->user->name }}, edit your future self</h2>
             <form action="/future-letters/{{$future_letter->id}}" method="POST">
                 @method('PUT')
                 @csrf
