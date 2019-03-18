@@ -2,6 +2,7 @@
 
 namespace Buzkall\FutureLetters;
 
+use Buzkall\FutureLetters\Commands\SendFutureLetters;
 use Illuminate\Support\ServiceProvider;
 
 class FutureLettersServiceProvider extends ServiceProvider
@@ -32,5 +33,9 @@ class FutureLettersServiceProvider extends ServiceProvider
 
         $this->loadViewsFrom(__DIR__ . '/views', 'future-letters');
         $this->publishes([__DIR__ . '/views' => base_path('resources/views/buzkall/future-letters')]);
+
+        if ($this->app->runningInConsole()) {
+            $this->commands([SendFutureLetters::class]);
+        }
     }
 }
