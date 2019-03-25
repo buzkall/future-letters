@@ -4,6 +4,7 @@ namespace Buzkall\FutureLetters;
 
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Cache;
 
 /**
  * Class FutureLetter
@@ -23,9 +24,15 @@ class FutureLetter extends Model
     {
         parent::boot();
 
-        static::creating(function ($model) {
-            $model->user_id = auth()->user()->id;
-        });
+        if (auth()->user()) {
+            static::creating(function ($model) {
+                $model->user_id = auth()->user()->id;
+            });
+
+            static::saving(function ($model) {
+                Cache::forget('getFutureLettersFromUserId'.  auth()->user()->id);
+            });
+        }
     }
 
     public function setSendingDateAttribute($value)
@@ -39,9 +46,13 @@ class FutureLetter extends Model
      */
     public static function getFutureLettersFromUserId($user_id)
     {
-        return self::where('user_id', $user_id)
-                   ->orderBy('sending_date', 'ASC')
-                   ->get();
+        $query = self::where('user_id', $user_id)
+                     ->orderBy('sending_date', 'ASC');
+        $name = 'getFutureLettersFromUserId' . $user_id;
+        $time = 600;
+        return Cache::remember($name, $time, function () use ($query) {
+            return $query->get();
+        });
     }
 
     public static function getFutureLettersToSend()

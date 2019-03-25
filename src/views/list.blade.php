@@ -32,7 +32,7 @@
                     <label for="sending_date">Sending date</label>
                     <div class='input-group date' id='datetimepicker'>
                         <input type="text" name="sending_date" id="sending_date" class="form-control"
-                               placeholder="When do you wan't to receive it?"
+                               placeholder="When do you want to receive it?"
                                aria-label="Username" aria-describedby="calendar">
                         <span class="input-group-addon input-group-append">
                             <span class="input-group-text" id="calendar"><i class="fa fa-calendar"></i></span>

@@ -18,10 +18,6 @@ class AddUserToFutureLetters extends Migration
             $table->foreign('user_id')->references('id')->on('users');
         });
 
-        // fix "Cannot add a NOT NULL column with default value NULL" sqlite problem
-        Schema::table('future_letters', function (Blueprint $table) {
-            $table->integer('user_id')->nullable(false)->change();
-        });
     }
 
     /**
