@@ -84,7 +84,7 @@ class FutureLetterController extends Controller
 
         if ($this->userIsOwner($future_letter)) {
             $future_letter->delete();
-            return redirect()->route('future-letters.index')->with('danger', 'Your future letter has been deleted!');
+            return redirect()->route('future-letters.index')->with('error', 'Your future letter has been deleted!');
         }
         return redirect()->route('future-letters.index')->with('error', 'Hey, that\'s not yours!');
     }

@@ -31,10 +31,10 @@
 @endif
 
 @section('scripts_footer')
-    <script type="text/javascript">
+    <script type='text/javascript'>
         $(document).ready(function () {
-            $(".delete").on("submit", function () {
-                return confirm("Are you sure?");
+            $('.delete').on('submit', function () {
+                return confirm('Are you sure?');
             });
         });
     </script>
