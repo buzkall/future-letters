@@ -4,45 +4,52 @@ namespace Buzkall\FutureLetters;
 
 use App\Http\Controllers\Controller;
 use Carbon\Carbon;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\View\View;
 
 class FutureLetterController extends Controller
 {
+
     /**
      * List Future Letters
      *
-     * @return \Illuminate\View\View
+     * @return View
      */
     public function index()
     {
-        $user_id = Auth::user()->id;
-        $future_letters = FutureLetter::getFutureLettersFromUserId($user_id);
+        if (Auth::id()) {
+            $user_id = Auth::user()->id;
+            $future_letters = FutureLetter::getFutureLettersFromUserId($user_id);
+        } else {
+            $future_letters = [];
+        }
         return view('future-letters::list', compact('future_letters'));
     }
 
     /**
      * @param FutureLetterRequest $request
-     * @return \Illuminate\Http\RedirectResponse
+     * @return RedirectResponse
      */
     public function store(FutureLetterRequest $request)
     {
         $input = $request->validated();
         FutureLetter::create($input);
 
-        return back()->with('success', 'Future letter prepared to send!');
+        return back()->with('success', 'Future letter prepared to be sent!');
     }
 
     /**
      * @param $id
-     * @return \Illuminate\View\View
+     * @return View
      */
     public function edit($id)
     {
         $future_letters = FutureLetter::all();
         $future_letter = FutureLetter::findOrFail($id);
 
-        if ($future_letter->user->id == Auth::user()->id) {
+        if ($this->userIsOwner($future_letter)) {
             return view('future-letters::edit', compact('future_letters', 'future_letter'));
         }
         return redirect()->route('future-letters.index')->with('error', 'That\'s not yours!');
@@ -51,35 +58,35 @@ class FutureLetterController extends Controller
     /**
      * @param FutureLetterRequest $request
      * @param                     $id
-     * @return \Illuminate\Http\RedirectResponse
+     * @return RedirectResponse
      */
     public function update(FutureLetterRequest $request, $id)
     {
         $input = $request->validated();
         $future_letter = FutureLetter::findOrFail($id);
 
-        if ($future_letter->user->id == Auth::user()->id) {
+        if ($this->userIsOwner($future_letter)) {
             $future_letter->update($input);
-            return redirect()->route('future-letters.index')->with('success', 'Updated your future letter!');
+            return redirect()->route('future-letters.edit', $id)->with('success', 'Your future letter has been updated!');
         }
-        return redirect()->route('future-letters.index')->with('error', 'That\'s not yours!');
+        return redirect()->route('future-letters.index')->with('error', 'Hey, that\'s not yours!');
     }
 
     /**
      * DELETE endpoint
      *
      * @param $id
-     * @return \Illuminate\Http\RedirectResponse
+     * @return RedirectResponse
      */
     public function destroy($id)
     {
         $future_letter = FutureLetter::findOrFail($id);
 
-        if ($future_letter->user->id == Auth::user()->id) {
+        if ($this->userIsOwner($future_letter)) {
             $future_letter->delete();
-            return redirect()->route('future-letters.index')->with('warning', 'Deleted future letter!');
+            return redirect()->route('future-letters.index')->with('danger', 'Your future letter has been deleted!');
         }
-        return redirect()->route('future-letters.index')->with('error', 'That\'s not yours!');
+        return redirect()->route('future-letters.index')->with('error', 'Hey, that\'s not yours!');
     }
 
     /**
@@ -93,18 +100,27 @@ class FutureLetterController extends Controller
         $future_letters_to_send = FutureLetter::getFutureLettersToSend();
         foreach ($future_letters_to_send as $future_letter_to_send) {
 
-            $output .= 'Sent mail to ' . $future_letter_to_send->email . '<br />';
+            $output .= 'Mail sent to ' . $future_letter_to_send->email . '<br />';
 
             $notification = new FutureLetterNotification($future_letter_to_send);
-            Notification::send($future_letter_to_send->user, $notification);
+            Notification::send($future_letter_to_send, $notification);
 
             // set to sent in db
             $future_letter_to_send->sent_at = Carbon::now();
             $future_letter_to_send->save();
         }
         if (empty($output)) {
-            $output = 'No messages ready to send';
+            $output = 'No letters ready to send';
         }
         echo $output;
+    }
+
+    /**
+     * @param $future_letter
+     * @return bool
+     */
+    public function userIsOwner($future_letter)
+    {
+        return $future_letter->user->id === Auth::user()->id;
     }
 }

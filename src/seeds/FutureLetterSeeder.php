@@ -15,5 +15,8 @@ class FutureLetterSeeder extends Seeder
     {
         factory(FutureLetter::class, 2)->create();
         factory(FutureLetter::class, 2)->state('sent')->create();
+        factory(FutureLetter::class, 1)->state('deleted')->create();
+
+        \Artisan::call('cache:clear');
     }
 }

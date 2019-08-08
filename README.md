@@ -12,6 +12,14 @@ composer require buzkall/future-letters
 
 Run migrations, register a user, log in and go to /future-letters
 
+<br/>
+
+You can seed the database with faker data running:
+```
+php artisan db:seed --class=Buzkall\\FutureLetters\\FutureLetterSee
+```
+
+<br/>
 You can modify the views publishing them:
 
 ```

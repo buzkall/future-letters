@@ -21,6 +21,7 @@ class CreateFutureLettersTable extends Migration
             $table->timestamp('sending_date');
             $table->timestamp('sent_at')->nullable()->default(null);
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

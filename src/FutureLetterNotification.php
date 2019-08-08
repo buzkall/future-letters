@@ -36,12 +36,16 @@ class FutureLetterNotification extends Notification
      * Get the mail representation of the notification.
      *
      * @param  mixed $notifiable
-     * @return \Illuminate\Notifications\Messages\MailMessage
+     * @return MailMessage
      */
     public function toMail($notifiable)
     {
+        $greeting = 'Hi,';
+        if ($this->future_letter->user) {
+            $greeting = 'Hi @' . $this->future_letter->user->name . ', ';
+        }
         return (new MailMessage)
-            ->greeting('Hi @' . $this->future_letter->user->name . ', ')
+            ->greeting($greeting)
             ->subject($this->future_letter->subject)
             ->line($this->future_letter->message)
             ->salutation('--FutureLetters-- 

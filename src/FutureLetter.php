@@ -4,15 +4,21 @@ namespace Buzkall\FutureLetters;
 
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\Cache;
 
 /**
  * Class FutureLetter
  *
  * @package Buzkall\FutureLetters
+ * @mixin \Eloquent
  */
 class FutureLetter extends Model
 {
+    use SoftDeletes;
+
     protected $fillable = [
         'email', 'subject', 'message', 'sending_date', 'sent_at',
     ];
@@ -35,12 +41,17 @@ class FutureLetter extends Model
         }
     }
 
+    /**
+     * Mutator to change the date format
+     * @param $value
+     */
     public function setSendingDateAttribute($value)
     {
         $this->attributes['sending_date'] = Carbon::createFromFormat('d/m/Y H:i', $value);
     }
 
     /**
+     * Get letters assigned to a user with a cache
      * @param $user_id
      * @return mixed
      */
@@ -55,6 +66,10 @@ class FutureLetter extends Model
         });
     }
 
+    /**
+     * Used from cron function
+     * @return mixed
+     */
     public static function getFutureLettersToSend()
     {
         return self::where('sending_date', '<=', Carbon::now())
@@ -63,11 +78,23 @@ class FutureLetter extends Model
     }
 
     /**
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsTo
+     * @return BelongsTo
      */
     public function user()
     {
         return $this->belongsTo('App\User');
+    }
+
+
+    /**
+     * Route notifications for the mail channel.
+     *
+     * @param  Notification  $notification
+     * @return string
+     */
+    public function routeNotificationFor($notification)
+    {
+        return $this->email;
     }
 
 }
