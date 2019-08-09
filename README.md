@@ -4,13 +4,25 @@ Laravel package used to write letters to you future self, that will be delivered
 
 ## Installation
 
-Install via composer:
+1. Install via composer:
+    ```
+    composer require buzkall/future-letters
+    ```
 
-```
-composer require buzkall/future-letters
-```
+2. Publish files
 
-Run migrations, register a user, log in and go to /future-letters
+    ```
+    php artisan vendor:publish --provider='Buzkall\FutureLetters\FutureLettersServiceProvider'
+    ```
+
+3. Run 
+
+    ```
+    php artisan make:auth
+    php artisan migrate
+    ```
+
+4. Register a user, log in and go to /future-letters
 
 <br/>
 
@@ -20,12 +32,7 @@ php artisan db:seed --class=Buzkall\\FutureLetters\\FutureLetterSee
 ```
 
 <br/>
-You can modify the views publishing them:
-
-```
-php artisan vendor:publish
-```
-
+You can modify the views which have been copied to the views directory then publishing
 
 <p align="center">
     <img src="https://i.imgur.com/akuneKQr.png" alt="teachable_schema">

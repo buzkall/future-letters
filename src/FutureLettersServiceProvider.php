@@ -38,9 +38,12 @@ class FutureLettersServiceProvider extends ServiceProvider
         $this->loadMigrationsFrom(__DIR__ . '/migrations');
         $this->app->make('Illuminate\Database\Eloquent\Factory')->load(__DIR__ . '/factories');
 
-        $this->loadViewsFrom(__DIR__ . '/views', 'future-letters');
+        $this->loadViewsFrom(__DIR__ . '/resources/views', 'future-letters');
         // publish the views in case the user wants to override them
-        $this->publishes([__DIR__ . '/views' => base_path('resources/views/buzkall/future-letters')]);
+        $this->publishes(
+            [__DIR__ . '/resources/views' => base_path('resources/views/buzkall/future-letters'),
+             __DIR__ . '/resources/js'    => public_path('js'),
+            ]);
 
         if ($this->app->runningInConsole()) {
             $this->commands([SendFutureLetters::class]);
