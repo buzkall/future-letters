@@ -56,11 +56,10 @@
 
 @section('scripts_footer')
     <script type="text/javascript">
-
         $(document).ready(function () {
             $('#datetimepicker').datetimepicker({
                 locale: 'es',
-                defaultDate: '{!! $future_letter->sending_date  !!}',
+                defaultDate: '{!! $future_letter->sending_date !!}',
                 ignoreReadonly: false
             });
         });

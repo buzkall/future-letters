@@ -8,7 +8,6 @@
 
     <title>@yield('title') {{config('app.name')}} @show</title>
 
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
     <link rel="stylesheet" href={{mix('css/app.css')}}>
 
 </head>
@@ -66,11 +65,11 @@
     @yield('content')
 </div>
 
-<script type="text/javascript" src="https://code.jquery.com/jquery-3.1.1.min.js"></script>
-<script type="text/javascript" src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="https://code.jquery.com/jquery-3.4.1.min.js"></script>
 <script type="text/javascript" src={{mix('js/app.js')}}></script>
 
 @yield('scripts_footer')
+@yield('scripts_footer_include')
 
 </body>
 </html>

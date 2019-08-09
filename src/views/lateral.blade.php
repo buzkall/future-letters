@@ -30,7 +30,7 @@
     </ul>
 @endif
 
-@section('scripts_footer')
+@section('scripts_footer_include')
     <script type='text/javascript'>
         $(document).ready(function () {
             $('.delete').on('submit', function () {
