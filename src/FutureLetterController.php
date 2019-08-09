@@ -46,7 +46,8 @@ class FutureLetterController extends Controller
      */
     public function edit($id)
     {
-        $future_letters = FutureLetter::all();
+        $user_id = Auth::user()->id;
+        $future_letters = FutureLetter::getFutureLettersFromUserId($user_id);
         $future_letter = FutureLetter::findOrFail($id);
 
         if ($this->userIsOwner($future_letter)) {
