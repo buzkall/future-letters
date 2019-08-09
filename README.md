@@ -15,7 +15,7 @@ Laravel package used to write letters to you future self, that will be delivered
     php artisan vendor:publish --provider='Buzkall\FutureLetters\FutureLettersServiceProvider'
     ```
 
-3. Run 
+3. After configuring your local database in the .env file, run 
 
     ```
     php artisan make:auth
