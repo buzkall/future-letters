@@ -62,7 +62,9 @@
             // default sending date: 30 days from now
             $('#datetimepicker').datetimepicker({
                 locale: 'es',
-                minDate: moment().add(30, 'days'),
+                useCurrent: false, // needed so minDate won't override defaultDate
+                defaultDate: moment().add(30, 'days'),
+                minDate: moment().add(1, 'days'),
                 ignoreReadonly: false
             });
         });
