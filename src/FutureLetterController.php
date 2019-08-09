@@ -3,11 +3,11 @@
 namespace Buzkall\FutureLetters;
 
 use App\Http\Controllers\Controller;
+use Auth;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Notification;
 use Illuminate\View\View;
+use Notification;
 
 class FutureLetterController extends Controller
 {
@@ -77,6 +77,7 @@ class FutureLetterController extends Controller
      *
      * @param $id
      * @return RedirectResponse
+     * @throws \Exception
      */
     public function destroy($id)
     {

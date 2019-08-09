@@ -3,17 +3,18 @@
 namespace Buzkall\FutureLetters;
 
 use Carbon\Carbon;
+use Eloquent;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Notifications\Notification;
-use Illuminate\Support\Facades\Cache;
+use Cache;
 
 /**
  * Class FutureLetter
  *
  * @package Buzkall\FutureLetters
- * @mixin \Eloquent
+ * @mixin Eloquent
  */
 class FutureLetter extends Model
 {

@@ -1,6 +1,5 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
@@ -28,7 +27,9 @@ class AddUserToFutureLetters extends Migration
     public function down()
     {
         Schema::table('future_letters', function (Blueprint $table) {
-            $table->dropForeign(['user_id']);
+            if (env('APP_ENV') != 'testing') {
+                $table->dropForeign(['user_id']);
+            }
             $table->dropColumn('user_id');
         });
     }
