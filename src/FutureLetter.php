@@ -108,7 +108,12 @@ class FutureLetter extends Model
 
     public function assignLetterToUser()
     {
-        $this->fill(['user_id' => Auth::user()->id])->save();
+        $this->update(['user_id' => Auth::user()->id]);
+    }
+
+    public function markEmailAsVerified()
+    {
+        $this->update(['email_verified_at' => Carbon::now()]);
     }
 
     /**
