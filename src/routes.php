@@ -1,10 +1,5 @@
 <?php
 
-// override the default / route
-Route::get('/', function () {
-    return redirect('future-letters');
-});
-
 Route::group(['middleware' => ['web']], function () {
     Route::get('/future-letters',
                'Buzkall\FutureLetters\FutureLetterController@index')
@@ -15,6 +10,9 @@ Route::group(['middleware' => ['web']], function () {
 
     Route::get('/future-letters/cron', 'Buzkall\FutureLetters\FutureLetterController@cron')
          ->name('future-letters.cron');
+
+    Route::get('/future-letters/verify', 'Buzkall\FutureLetters\FutureLetterController@verify')
+         ->name('verification.verify');
 });
 
 

@@ -13,7 +13,7 @@ class AddUserToFutureLetters extends Migration
     public function up()
     {
         Schema::table('future_letters', function (Blueprint $table) {
-            $table->bigInteger('user_id')->unsigned()->nullable()->after('id');
+            $table->integer('user_id')->unsigned()->nullable()->after('id');
             $table->foreign('user_id')->references('id')->on('users');
         });
 

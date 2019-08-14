@@ -2,11 +2,14 @@
 
 namespace Buzkall\FutureLetters;
 
+use Auth;
 use Carbon\Carbon;
 use Eloquent;
+use Illuminate\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Notifications\Notifiable;
 use Illuminate\Notifications\Notification;
 use Cache;
 
@@ -19,12 +22,14 @@ use Cache;
 class FutureLetter extends Model
 {
     use SoftDeletes;
+    use Notifiable;
+    use MustVerifyEmail;
 
     protected $fillable = [
-        'email', 'subject', 'message', 'sending_date', 'sent_at',
+        'user_id', 'email', 'subject', 'message', 'sending_date', 'email_verified_at', 'sent_at',
     ];
 
-    protected $dates = ['sending_date', 'sent_at'];
+    protected $dates = ['sending_date', 'email_verified_at', 'sent_at'];
 
 
     public static function boot()
@@ -37,13 +42,14 @@ class FutureLetter extends Model
             });
 
             static::saving(function ($model) {
-                Cache::forget('getFutureLettersFromUserId'.  auth()->user()->id);
+                Cache::forget('getFutureLettersFromUserId' . auth()->user()->id);
             });
         }
     }
 
     /**
      * Mutator to change the date format
+     *
      * @param $value
      */
     public function setSendingDateAttribute($value)
@@ -53,6 +59,7 @@ class FutureLetter extends Model
 
     /**
      * Get letters assigned to a user with a cache
+     *
      * @param $user_id
      * @return mixed
      */
@@ -68,14 +75,40 @@ class FutureLetter extends Model
     }
 
     /**
-     * Used from cron function
+     * Used from cron function - send only the lines with a date in verified_at and without sent_at
+     *
      * @return mixed
      */
     public static function getFutureLettersToSend()
     {
         return self::where('sending_date', '<=', Carbon::now())
+                   ->where(function ($query) {
+                       $query->whereNotNull('email_verified_at')
+                             ->orWhereNotNull('user_id');
+                   })
                    ->whereNull('sent_at')
                    ->get();
+    }
+
+    public static function getNumberOfUnverifiedEmailsSentToEmail($email, $days = 1)
+    {
+        return self::where('email', $email)
+                   ->whereNull('email_verified_at')
+                   ->whereDate('created_at', '>', Carbon::now()->subDays($days))
+                   ->count();
+    }
+
+    public function userIsOwner()
+    {
+        if (is_null($this->user) && !Auth::guest()) {
+            $this->assignLetterToUser();
+        }
+        return $this->user_id === Auth::id();
+    }
+
+    public function assignLetterToUser()
+    {
+        $this->fill(['user_id' => Auth::user()->id])->save();
     }
 
     /**
@@ -90,7 +123,7 @@ class FutureLetter extends Model
     /**
      * Route notifications for the mail channel.
      *
-     * @param  Notification  $notification
+     * @param Notification $notification
      * @return string
      */
     public function routeNotificationFor($notification)

@@ -1,6 +1,7 @@
 <?php
 
 use Buzkall\FutureLetters\FutureLetter;
+use Carbon\Carbon;
 use Faker\Generator as Faker;
 
 $factory->define(FutureLetter::class, function (Faker $faker) {
@@ -15,10 +16,17 @@ $factory->define(FutureLetter::class, function (Faker $faker) {
     ];
 });
 
+$factory->state(FutureLetter::class, 'verified', function (Faker $faker) {
+    return [
+        'email_verified_at' => Carbon::now()
+    ];
+});
+
 $factory->state(FutureLetter::class, 'sent', function (Faker $faker) {
     return [
-        'sending_date' => $faker->dateTimeBetween('-1 week', '-1 day')->format('d/m/Y H:i'),
-        'sent_at'      => $faker->dateTimeBetween('0 day', '0 day'),
+        'email_verified_at' => Carbon::now(),
+        'sending_date'      => $faker->dateTimeBetween('-1 week', '-1 day')->format('d/m/Y H:i'),
+        'sent_at'           => $faker->dateTimeBetween('0 day', '0 day'),
     ];
 });
 

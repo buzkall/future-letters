@@ -5,7 +5,11 @@ namespace Buzkall\FutureLetters;
 use App\Http\Controllers\Controller;
 use Auth;
 use Carbon\Carbon;
+use Exception;
+use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Routing\Redirector;
 use Illuminate\View\View;
 use Notification;
 
@@ -19,11 +23,9 @@ class FutureLetterController extends Controller
      */
     public function index()
     {
-        if (Auth::id()) {
-            $user_id = Auth::user()->id;
+        $future_letters = [];
+        if ($user_id = Auth::id()) {
             $future_letters = FutureLetter::getFutureLettersFromUserId($user_id);
-        } else {
-            $future_letters = [];
         }
         return view('future-letters::list', compact('future_letters'));
     }
@@ -35,10 +37,45 @@ class FutureLetterController extends Controller
     public function store(FutureLetterRequest $request)
     {
         $input = $request->validated();
-        FutureLetter::create($input);
 
-        return back()->with('success', 'Future letter prepared to be sent!');
+        // anti spam measures. In case someone tries to send a bunch of verify emails
+        // to someone else, only send one each day
+        if (FutureLetter::getNumberOfUnverifiedEmailsSentToEmail($input['email']) > 0) {
+            $message = 'Too many unverified emails sent to that email';
+            return back()->with('error', $message);
+        }
+
+        $future_letter = FutureLetter::create($input);
+        $message = 'Future letter prepared to be sent!';
+        if (Auth::guest()) {
+            $future_letter->sendEmailVerificationNotification();
+            $message .= 'We\'ve sent you an email so you can verify you own this email.';
+        }
+
+        return back()->with('success', $message);
     }
+
+    /**
+     * @param Request $request
+     * @return RedirectResponse|Redirector
+     * @throws AuthorizationException
+     */
+    public function verify(Request $request)
+    {
+        if (!isset($request->id)) {
+            throw new AuthorizationException;
+        }
+
+        $future_letter = FutureLetter::findOrFail($request->id);
+
+        if (!$future_letter->hasVerifiedEmail()) {
+            $future_letter->markEmailAsVerified();
+        }
+
+        $message = 'Thank you for verifying your email.';
+        return redirect($this->redirectPath($request->id))->with('success', $message);
+    }
+
 
     /**
      * @param $id
@@ -46,11 +83,10 @@ class FutureLetterController extends Controller
      */
     public function edit($id)
     {
-        $user_id = Auth::user()->id;
-        $future_letters = FutureLetter::getFutureLettersFromUserId($user_id);
+        $future_letters = FutureLetter::getFutureLettersFromUserId(Auth::id());
         $future_letter = FutureLetter::findOrFail($id);
 
-        if ($this->userIsOwner($future_letter)) {
+        if ($future_letter->userIsOwner()) {
             return view('future-letters::edit', compact('future_letters', 'future_letter'));
         }
         return redirect()->route('future-letters.index')->with('error', 'That\'s not yours!');
@@ -66,7 +102,7 @@ class FutureLetterController extends Controller
         $input = $request->validated();
         $future_letter = FutureLetter::findOrFail($id);
 
-        if ($this->userIsOwner($future_letter)) {
+        if ($future_letter->userIsOwner()) {
             $future_letter->update($input);
             return redirect()->route('future-letters.edit', $id)->with('success', 'Your future letter has been updated!');
         }
@@ -78,13 +114,13 @@ class FutureLetterController extends Controller
      *
      * @param $id
      * @return RedirectResponse
-     * @throws \Exception
+     * @throws Exception
      */
     public function destroy($id)
     {
         $future_letter = FutureLetter::findOrFail($id);
 
-        if ($this->userIsOwner($future_letter)) {
+        if ($future_letter->userIsOwner()) {
             $future_letter->delete();
             return redirect()->route('future-letters.index')->with('error', 'Your future letter has been deleted!');
         }
@@ -118,11 +154,14 @@ class FutureLetterController extends Controller
     }
 
     /**
-     * @param $future_letter
+     * @param $id
      * @return bool
      */
-    public function userIsOwner($future_letter)
+    public function redirectPath($id)
     {
-        return $future_letter->user->id === Auth::user()->id;
+        if (!Auth::guest()) {
+            return route('future-letters.edit', $id);
+        }
+        return route('future-letters.index');
     }
 }

@@ -23,8 +23,13 @@ class FutureLetterTest extends TestCase
 
         $user = factory(User::class)->create();
         Auth::login($user);
-        factory(FutureLetter::class, $count_not_sent)->create(['user_id' => $user->id]);
-        factory(FutureLetter::class, $count_sent)->states('sent')->create(['user_id' => $user->id]);
+
+        factory(FutureLetter::class, $count_not_sent)
+            ->create(['user_id' => $user->id]);
+
+        factory(FutureLetter::class, $count_sent)
+            ->states('sent')
+            ->create(['user_id' => $user->id]);
 
         $this->assertCount($count_not_sent + $count_sent, FutureLetter::all());
     }
@@ -53,7 +58,8 @@ class FutureLetterTest extends TestCase
 
         $user = factory(User::class)->create();
         Auth::login($user);
-        $future_letters = factory(FutureLetter::class, $count_not_sent)->create(['user_id' => $user->id]);
+        $future_letters = factory(FutureLetter::class, $count_not_sent)
+            ->create(['user_id' => $user->id]);
         $future_letter = $future_letters[0];
 
         $this->assertNotEquals($subject, $future_letter->subject);
@@ -66,15 +72,38 @@ class FutureLetterTest extends TestCase
     }
 
 
-    public function testSendFutureLetterViaCron()
+    public function testSendFutureLetterViaCronNotVerifiedGuest()
+    {
+        $count_not_sent = 1;
+        $date = Carbon::yesterday()->format('d/m/Y H:i');
+
+        $future_letters = factory(FutureLetter::class, $count_not_sent)
+            ->create(['user_id'      => NULL,
+                      'sending_date' => $date]);
+
+        $future_letter = $future_letters[0];
+        $this->assertNull($future_letter->sent_at);
+
+        // fake cron
+        $future_letter = new FutureLetterController();
+        $future_letter->cron();
+
+        $user_future_letters = FutureLetter::all();
+        $this->assertNull($user_future_letters[0]->sent_at);
+    }
+
+    public function testSendFutureLetterViaCronNotVerifiedButLogged()
     {
         $count_not_sent = 1;
         $date = Carbon::yesterday()->format('d/m/Y H:i');
 
         $user = factory(User::class)->create();
         Auth::login($user);
-        $future_letters = factory(FutureLetter::class, $count_not_sent)->create(['user_id'      => $user->id,
-                                                                                 'sending_date' => $date]);
+
+        $future_letters = factory(FutureLetter::class, $count_not_sent)
+            ->create(['user_id'      => $user->id,
+                      'sending_date' => $date]);
+
         $future_letter = $future_letters[0];
         $this->assertNull($future_letter->sent_at);
 
@@ -84,6 +113,27 @@ class FutureLetterTest extends TestCase
 
         $user_future_letters = FutureLetter::getFutureLettersFromUserId($user->id);
         $this->assertNotNull($user_future_letters[0]->sent_at);
+    }
 
+    public function testSendFutureLetterViaCron()
+    {
+        $count_not_sent = 1;
+        $date = Carbon::yesterday()->format('d/m/Y H:i');
+
+        $user = factory(User::class)->create();
+        Auth::login($user);
+        $future_letters = factory(FutureLetter::class, $count_not_sent)
+            ->states('verified')
+            ->create(['user_id'      => $user->id,
+                      'sending_date' => $date]);
+        $future_letter = $future_letters[0];
+        $this->assertNull($future_letter->sent_at);
+
+        // fake cron
+        $future_letter = new FutureLetterController();
+        $future_letter->cron();
+
+        $user_future_letters = FutureLetter::getFutureLettersFromUserId($user->id);
+        $this->assertNotNull($user_future_letters[0]->sent_at);
     }
 }

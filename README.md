@@ -1,6 +1,7 @@
 # Future Letters
 
 Laravel package used to write letters to you future self, that will be delivered to your inbox on a selected date.
+To avoid spam, a verification email (only one per day) will be sent when sending as guest. 
 
 ## Installation
 
@@ -22,7 +23,7 @@ Laravel package used to write letters to you future self, that will be delivered
     php artisan migrate
     ```
 
-4. Register a user, log in and go to /future-letters
+4. Register a user, log in and navigate to /future-letters
 
 <br/>
 

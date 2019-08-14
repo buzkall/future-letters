@@ -17,8 +17,9 @@ class CreateFutureLettersTable extends Migration
             $table->increments('id');
             $table->string('email');
             $table->string('subject');
-            $table->string('message');
+            $table->text('message');
             $table->timestamp('sending_date');
+            $table->timestamp('email_verified_at')->nullable()->default(null);
             $table->timestamp('sent_at')->nullable()->default(null);
             $table->timestamps();
             $table->softDeletes();
