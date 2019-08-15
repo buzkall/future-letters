@@ -22,8 +22,15 @@ To avoid spam, a verification email (only one per day) will be sent when sending
     php artisan make:auth
     php artisan migrate
     ```
+   
+4. Add the command call to the Kernel.php file in app/Console
+In function schedule add:
 
-4. Register a user, log in and navigate to /future-letters
+    ```
+    $schedule->command('send:future-letters')->everyMinute();
+    ```
+
+5. Register a user, log in and navigate to /future-letters
 
 <br/>
 
